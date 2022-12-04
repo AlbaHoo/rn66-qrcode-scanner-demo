@@ -10,11 +10,15 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@ant-design/react-native": "^5.0.2",
+    "@react-navigation/native": "^6.0.16",
+    "@react-navigation/native-stack": "^6.9.4",
     "react": "17.0.2",
     "react-native": "0.66.5",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-reanimated": "2.5.0",
     "react-native-safe-area-context": "^3.3.2",
+    "react-native-screens": "^3.18.2",
     "react-native-vision-camera": "2.13.0",
     "vision-camera-code-scanner": "^0.2.0"
   },
