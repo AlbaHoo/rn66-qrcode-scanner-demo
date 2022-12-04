@@ -6,8 +6,11 @@
  * @flow strict-local
  */
 
-import React from 'react';
 import type {Node} from 'react';
+import * as React from 'react';
+import { useCameraDevices } from 'react-native-vision-camera';
+import { Camera } from 'react-native-vision-camera';
+import { useScanBarcodes, BarcodeFormat } from 'vision-camera-code-scanner';
 import {
   SafeAreaView,
   ScrollView,
@@ -51,62 +54,55 @@ const Section = ({children, title}): Node => {
     </View>
   );
 };
+export default function App() {
+  const [hasPermission, setHasPermission] = React.useState(false);
+  const devices = useCameraDevices();
+  const device = devices.back;
 
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+  const [frameProcessor, barcodes] = useScanBarcodes([BarcodeFormat.QR_CODE], {
+    checkInverted: true,
+  });
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  // Alternatively you can use the underlying function:
+  //
+  // const frameProcessor = useFrameProcessor((frame) => {
+  //   'worklet';
+  //   const detectedBarcodes = scanBarcodes(frame, [BarcodeFormat.QR_CODE], { checkInverted: true });
+  //   runOnJS(setBarcodes)(detectedBarcodes);
+  // }, []);
+
+  React.useEffect(() => {
+    (async () => {
+      const status = await Camera.requestCameraPermission();
+      setHasPermission(status === 'authorized');
+    })();
+  }, []);
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    device != null &&
+    hasPermission && (
+      <>
+        <Camera
+          style={StyleSheet.absoluteFill}
+          device={device}
+          isActive={true}
+          frameProcessor={frameProcessor}
+          frameProcessorFps={5}
+        />
+        {barcodes.map((barcode, idx) => (
+          <Text key={idx} style={styles.barcodeTextURL}>
+            {barcode.displayValue}
+          </Text>
+        ))}
+      </>
+    )
   );
-};
+}
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+  barcodeTextURL: {
+    fontSize: 20,
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
-
-export default App;

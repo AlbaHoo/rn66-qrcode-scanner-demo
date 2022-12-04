@@ -1,0 +1,7 @@
+#!/bin/sh
+cd android && ./gradlew assembleRelease
+aws s3 cp /Users/alba/develop/helong/rn66/android/app/build/outputs/apk/release/app-release.apk s3://tenty-misc/demo/app.${1:-'final'}.apk
+echo "deployed to s3://tenty-misc/demo/app.${1:-'final'}.apk"
+echo "http://downloads.tenty.co/demo/app.${1:-'final'}.apk"
+cd ..
+
